@@ -1,5 +1,5 @@
 import { SurveyComponent } from './survey.component'
-import { of, Subject } from 'rxjs'
+import { of, Subject, throwError } from 'rxjs'
 import { environment } from '../../../../../../../../../src/environments/environment'
 
 // Mock dependencies
@@ -107,6 +107,40 @@ describe('SurveyComponent', () => {
     })
 
     // Verify loadSurveyList was updated
+    expect(component.loadSurveyList).toBe(true)
+  })
+
+  test('should format survey list when getSurveysData returns surveys', () => {
+    mockSurveyApiService.getSurveyResults.mockReturnValue(of({
+      status: 200,
+      SolutionList: [{ SOLUTION_ID: 'survey-1', START_DATE: '2025-01-01T00:00:00' }],
+    }))
+
+    component.getSurveysData()
+
+    expect(component.data).toHaveLength(1)
+    expect(component.loadSurveyList).toBe(true)
+  })
+
+  test('should stop loading when getSurveysData returns an error status', () => {
+    mockSurveyApiService.getSurveyResults.mockReturnValue(of({
+      status: 400,
+      code: 'NOTOK',
+      SolutionList: 'Error in getting the list of solutions',
+    }))
+
+    component.getSurveysData()
+
+    expect(component.data).toEqual([])
+    expect(component.loadSurveyList).toBe(true)
+  })
+
+  test('should stop loading when getSurveysData request fails', () => {
+    mockSurveyApiService.getSurveyResults.mockReturnValue(throwError({ status: 500 }))
+
+    component.getSurveysData()
+
+    expect(component.data).toEqual([])
     expect(component.loadSurveyList).toBe(true)
   })
 
