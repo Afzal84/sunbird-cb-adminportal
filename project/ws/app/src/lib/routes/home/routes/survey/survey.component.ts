@@ -118,16 +118,13 @@ export class SurveyComponent implements OnInit {
     this.data = []
     const reqPayLoad = { "resourceType": "Survey" }
     this.surveyApiService.getSurveyResults(reqPayLoad).subscribe((response: any) => {
-      if (response && response.status === 200) {
-        if (response && response.SolutionList && response.SolutionList.length) {
-          //this.data = response.SolutionList
-          //this.data = response.SolutionList
-
-          this.formatData(response.SolutionList)
-        } else {
-          this.loadSurveyList = true
-        }
+      if (response && response.status === 200 && response.SolutionList && response.SolutionList.length) {
+        this.formatData(response.SolutionList)
+      } else {
+        this.loadSurveyList = true
       }
+    }, () => {
+      this.loadSurveyList = true
     })
   }
 
