@@ -357,6 +357,33 @@ describe('SsoIntegrationComponent', () => {
       expect(snackBar.openFromComponent.mock.calls[0][1].data.type).toBe('success')
     })
 
+    it('should mark the provider as authenticated when the test status is success', () => {
+      component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
+      component.testLtiConfiguration(dialogRef)
+      expect(marketplaceService.updateProvider.mock.calls[0][0].data.isAuthenticate).toBe(true)
+    })
+
+    it('should compare the test status case-insensitively', () => {
+      component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
+      marketplaceService.ltiSSOTest.mockReturnValue(of({ responseCode: 'OK', params: { status: 'SUCCESS' } }))
+      component.testLtiConfiguration(dialogRef)
+      expect(marketplaceService.updateProvider.mock.calls[0][0].data.isAuthenticate).toBe(true)
+    })
+
+    it('should not mark the provider as authenticated when the test status is not success', () => {
+      component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
+      marketplaceService.ltiSSOTest.mockReturnValue(of({ responseCode: 'OK', params: { status: 'Failed' } }))
+      component.testLtiConfiguration(dialogRef)
+      expect(marketplaceService.updateProvider.mock.calls[0][0].data.isAuthenticate).toBeUndefined()
+    })
+
+    it('should not mark the provider as authenticated when the test response is not OK', () => {
+      component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
+      marketplaceService.ltiSSOTest.mockReturnValue(of({ responseCode: 'FAIL' }))
+      component.testLtiConfiguration(dialogRef)
+      expect(marketplaceService.updateProvider.mock.calls[0][0].data.isAuthenticate).toBeUndefined()
+    })
+
     it('should use the backend error message when provided', () => {
       component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
       marketplaceService.ltiSSOTest.mockReturnValue(of({ responseCode: 'OK', params: { status: 'Failed', errmsg: 'nonce' } }))
