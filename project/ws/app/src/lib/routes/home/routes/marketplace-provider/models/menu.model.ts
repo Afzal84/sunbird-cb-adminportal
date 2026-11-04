@@ -7,7 +7,7 @@ export const MARKETPLACE_CONFIGURE_PROVIDERS_MENU = [
   },
   {
     id: 2,
-    label: 'SSO Integration',
+    label: 'Integration',
     slug: 'sso_integration',
     disabled: true
   },

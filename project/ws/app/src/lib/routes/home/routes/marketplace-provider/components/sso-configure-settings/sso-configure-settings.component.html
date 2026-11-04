@@ -1,151 +1,41 @@
 <div class="sso-provider-settings flex gap-4 mt-4 lg:flex-row flex-col">
   <ng-container *ngIf="!testSSOConnectionVisible">
-    <div class="wrapper-border p-4 bg-white rounded-lg flex-1" [formGroup]="ssoSettingsForm">
-      <p class="page-title">SSO Provider Settings</p>
+    <div class="wrapper-border p-4 bg-white rounded-lg flex-1">
+      <p class="page-title">Provider Settings</p>
       <p class="text-sm section-title mb-6 mt-2">
         Configure Single Sign-ON Seamless partner LMS connectivity
       </p>
 
-      <div class="sso-form-settings">
-        <div class="pb-4 b-seperator">
-          <div class="flex flex-column gap-1 mat-field-rounded">
-            <div class="flex items-center gap-1 required">
-              <span class="label">SSO Protocol</span>
-            </div>
-            <mat-form-field class="w-full">
-              <mat-select placeholder="Select" formControlName="ssoProtocol">
-                <ng-container *ngFor="let type of ssoProtocolsList">
-                  <mat-option [value]="type.value">{{ type.name }}</mat-option>
-                </ng-container>
-              </mat-select>
-              <mat-error class="m-1" *ngIf="
-                  ssoSettingsForm.get('ssoProtocol').hasError('required') &&
-                  (ssoSettingsForm.get('ssoProtocol').dirty ||
-                    ssoSettingsForm.get('ssoProtocol').touched)
-                ">This field is required</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="flex flex-column gap-1 mat-field-rounded">
-            <div class="flex items-center gap-1 required">
-              <span class="label">Partner Name</span>
-            </div>
-            <mat-form-field class="w-full">
-              <input matInput placeholder="Type here" formControlName="partnerName" />
-              <mat-error class="m-1" *ngIf="
-                  ssoSettingsForm.get('partnerName').hasError('required') &&
-                  (ssoSettingsForm.get('partnerName').dirty ||
-                    ssoSettingsForm.get('partnerName').touched)
-                ">This field is required</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="flex flex-column gap-1 mat-field-rounded">
-            <div class="flex items-center gap-1 required">
-              <span class="label">Entity ID / Client ID</span>
-            </div>
-            <mat-form-field class="w-full">
-              <input matInput placeholder="Type here" formControlName="clientId" />
-              <mat-error class="m-1" *ngIf="
-                  ssoSettingsForm.get('clientId').hasError('required') &&
-                  (ssoSettingsForm.get('clientId').dirty || ssoSettingsForm.get('clientId').touched)
-                ">This field is required</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="flex flex-column gap-1 mat-field-rounded">
-            <div class="flex items-center gap-1 required">
-              <span class="label">SSO URL / Authorisation Endpoint</span>
-            </div>
-            <mat-form-field class="w-full">
-              <input matInput placeholder="Type here" formControlName="ssoUrl" />
-              <mat-error class="m-1" *ngIf="
-                  ssoSettingsForm.get('ssoUrl').hasError('required') &&
-                  (ssoSettingsForm.get('ssoUrl').dirty || ssoSettingsForm.get('ssoUrl').touched)
-                ">This field is required</mat-error>
-              <mat-error class="m-1" *ngIf="
-                  ssoSettingsForm.get('ssoUrl').hasError('invalidUrl') &&
-                  (ssoSettingsForm.get('ssoUrl').dirty || ssoSettingsForm.get('ssoUrl').touched)
-                ">Please enter a valid URL</mat-error>
-            </mat-form-field>
-          </div>
+      <div class="flex flex-column gap-1 mat-field-rounded pb-2">
+        <div class="flex items-center gap-1">
+          <span class="label">Protocol</span>
         </div>
-
-        <div class="second-section mt-4 flex items-start justify-between">
-          <div class="second-sec-left">
-            <p class="page-title">Attribute Mapping</p>
-            <p class="text-sm section-title mb-6 mt-2">Map SSO attributes to user profile fields</p>
-          </div>
-          <div class="second-sec-right">
-            <button type="button" (click)="addMappers()" mat-flat-button
-              [matTooltip]="!canAddMapper() ? 'Please fill the last mapper before adding a new one' : ''"
-              matTooltipPosition="above" [ngClass]="{'btn-disable': !canAddMapper()}"
-              class="flex items-center rounded-full px-4 py-2 btn-primary font-bold text-sm mat-btn-flat mat-btn-height-32">
-              Add Mapper
-            </button>
-          </div>
-        </div>
-
-        <div formArrayName="mappers" *ngFor="let mapper of mappersFormArray.controls; let i = index"
-          class="mapper-row mb-3 mat-field-rounded w-full">
-          <div [formGroupName]="i" class="flex items-center gap-4 w-full">
-            <div class="flex flex-col w-full">
-              <div class="flex items-center gap-1 required">
-                <span class="label">key</span>
-              </div>
-              <mat-form-field class="flex-1" appearance="outline">
-                <input matInput placeholder="Key" formControlName="key" />
-                <mat-error *ngIf="
-                                        mappersFormArray.at(i).get('key')?.hasError('required') &&
-                                        (mappersFormArray.at(i).get('key')?.dirty ||
-                                          mappersFormArray.at(i).get('key')?.touched)
-                                      ">
-                  Key is required
-                </mat-error>
-              </mat-form-field>
-            </div>
-            <div class="flex flex-col w-full">
-              <div class="flex items-center gap-1 required">
-                <span class="label">value</span>
-              </div>
-              <mat-form-field class="flex-1">
-                <input matInput placeholder="Value" formControlName="value" [matAutocomplete]="autoValue">
-                <mat-autocomplete #autoValue="matAutocomplete">
-                  <mat-option *ngFor="let option of attributesOptionsList" [value]="option">
-                    {{ option }}
-                  </mat-option>
-                </mat-autocomplete>
-                <mat-error *ngIf="
-                                            mappersFormArray.at(i).get('value')?.hasError('required') &&
-                                            (mappersFormArray.at(i).get('value')?.dirty ||
-                                            mappersFormArray.at(i).get('value')?.touched)
-                                          ">
-                  Value is required
-                </mat-error>
-              </mat-form-field>
-            </div>
-            <button type="button" mat-icon-button (click)="removeMapper(i)" class="remove-mapper-btn"
-              *ngIf="mappersFormArray.length > 1" matTooltip="Remove mapper">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        </div>
+        <mat-form-field class="w-full">
+          <mat-select placeholder="Select" [value]="settingsType" [disabled]="isProtocolLocked"
+            (selectionChange)="onSettingsChange($event.value)">
+            <mat-option *ngFor="let option of settingsOptions" [value]="option.value">{{ option.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
 
-      <div class="flex gap-4 items-center justify-center mt-6">
-        <button (click)="navigateToProvidersDashboard()" mat-flat-button
-          class="flex rounded-full px-4 py-2 font-bold text-sm mat-btn-outline mat-btn-height-32">
-          Cancel
-        </button>
-        <button (click)="updateCreateSSO()" mat-flat-button [disabled]="isSaveDisabled"
-          class="flex items-center rounded-full px-4 py-2 btn-primaryr font-bold text-sm mat-btn-flat mat-btn-height-32">
-          {{ SSOConfigurationData ? 'Update' : 'Save' }}
-        </button>
-      </div>
+      <ng-container *ngTemplateOutlet="settingsType === 'LTI' ? ltiTemplate : ssoTemplate"></ng-container>
+
+      <ng-container *ngIf="settingsType === 'sso'">
+        <div class="flex gap-4 items-center justify-center mt-6">
+          <button (click)="navigateToProvidersDashboard()" mat-flat-button
+            class="flex rounded-full px-4 py-2 font-bold text-sm mat-btn-outline mat-btn-height-32">
+            Cancel
+          </button>
+          <button (click)="updateCreateSSO()" mat-flat-button [disabled]="isSaveDisabled"
+            class="flex items-center rounded-full px-4 py-2 btn-primaryr font-bold text-sm mat-btn-flat mat-btn-height-32">
+            {{ SSOConfigurationData ? 'Update' : 'Save' }}
+          </button>
+        </div>
+      </ng-container>
     </div>
   </ng-container>
 
-  <div class="meta-info-section">
+  <div class="meta-info-section" *ngIf="settingsType === 'sso'">
     <div class="sso-provider-meta wrapper-border p-4 bg-white rounded-lg">
       <p class="sub-heading-title mb-4">Service Provider Info</p>
 
@@ -216,3 +106,238 @@
     </div>
   </div>
 </div>
+
+<ng-template #ssoTemplate>
+  <div [formGroup]="ssoSettingsForm">
+    <div class="sso-form-settings">
+      <div class="pb-4 b-seperator">
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1 required">
+            <span class="label">SSO Protocol</span>
+          </div>
+          <mat-form-field class="w-full">
+            <mat-select placeholder="Select" formControlName="ssoProtocol">
+              <ng-container *ngFor="let type of ssoProtocolsList">
+                <mat-option [value]="type.value">{{ type.name }}</mat-option>
+              </ng-container>
+            </mat-select>
+            <mat-error class="m-1" *ngIf="
+                    ssoSettingsForm.get('ssoProtocol').hasError('required') &&
+                    (ssoSettingsForm.get('ssoProtocol').dirty ||
+                      ssoSettingsForm.get('ssoProtocol').touched)
+                  ">This field is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1 required">
+            <span class="label">Partner Name</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input matInput placeholder="Type here" formControlName="partnerName" />
+            <mat-error class="m-1" *ngIf="
+                    ssoSettingsForm.get('partnerName').hasError('required') &&
+                    (ssoSettingsForm.get('partnerName').dirty ||
+                      ssoSettingsForm.get('partnerName').touched)
+                  ">This field is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1 required">
+            <span class="label">Entity ID / Client ID</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input matInput placeholder="Type here" formControlName="clientId" />
+            <mat-error class="m-1" *ngIf="
+                    ssoSettingsForm.get('clientId').hasError('required') &&
+                    (ssoSettingsForm.get('clientId').dirty || ssoSettingsForm.get('clientId').touched)
+                  ">This field is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1 required">
+            <span class="label">SSO URL / Authorisation Endpoint</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input matInput placeholder="Type here" formControlName="ssoUrl" />
+            <mat-error class="m-1" *ngIf="
+                    ssoSettingsForm.get('ssoUrl').hasError('required') &&
+                    (ssoSettingsForm.get('ssoUrl').dirty || ssoSettingsForm.get('ssoUrl').touched)
+                  ">This field is required</mat-error>
+            <mat-error class="m-1" *ngIf="
+                    ssoSettingsForm.get('ssoUrl').hasError('invalidUrl') &&
+                    (ssoSettingsForm.get('ssoUrl').dirty || ssoSettingsForm.get('ssoUrl').touched)
+                  ">Please enter a valid URL</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="second-section mt-4 flex items-start justify-between">
+        <div class="second-sec-left">
+          <p class="page-title">Attribute Mapping</p>
+          <p class="text-sm section-title mb-6 mt-2">Map SSO attributes to user profile fields</p>
+        </div>
+        <div class="second-sec-right">
+          <button type="button" (click)="addMappers()" mat-flat-button
+            [matTooltip]="!canAddMapper() ? 'Please fill the last mapper before adding a new one' : ''"
+            matTooltipPosition="above" [ngClass]="{'btn-disable': !canAddMapper()}"
+            class="flex items-center rounded-full px-4 py-2 btn-primary font-bold text-sm mat-btn-flat mat-btn-height-32">
+            Add Mapper
+          </button>
+        </div>
+      </div>
+
+      <div formArrayName="mappers" *ngFor="let mapper of mappersFormArray.controls; let i = index"
+        class="mapper-row mb-3 mat-field-rounded w-full">
+        <div [formGroupName]="i" class="flex items-center gap-4 w-full">
+          <div class="flex flex-col w-full">
+            <div class="flex items-center gap-1 required">
+              <span class="label">key</span>
+            </div>
+            <mat-form-field class="flex-1" appearance="outline">
+              <input matInput placeholder="Key" formControlName="key" />
+              <mat-error *ngIf="
+                                          mappersFormArray.at(i).get('key')?.hasError('required') &&
+                                          (mappersFormArray.at(i).get('key')?.dirty ||
+                                            mappersFormArray.at(i).get('key')?.touched)
+                                        ">
+                Key is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="flex flex-col w-full">
+            <div class="flex items-center gap-1 required">
+              <span class="label">value</span>
+            </div>
+            <mat-form-field class="flex-1">
+              <input matInput placeholder="Value" formControlName="value" [matAutocomplete]="autoValue">
+              <mat-autocomplete #autoValue="matAutocomplete">
+                <mat-option *ngFor="let option of attributesOptionsList" [value]="option">
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="
+                                              mappersFormArray.at(i).get('value')?.hasError('required') &&
+                                              (mappersFormArray.at(i).get('value')?.dirty ||
+                                              mappersFormArray.at(i).get('value')?.touched)
+                                            ">
+                Value is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <button type="button" mat-icon-button (click)="removeMapper(i)" class="remove-mapper-btn"
+            *ngIf="mappersFormArray.length > 1" matTooltip="Remove mapper">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #ltiTemplate>
+  <div class="lti-form-settings pb-4 b-seperator" [formGroup]="ltiForm">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+      <ng-container *ngIf="showLtiReadonlyFields">
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1">
+            <span class="label">LTI Version</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input matInput formControlName="ltiVersion" />
+          </mat-form-field>
+        </div>
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1">
+            <span class="label">Tool Issuer</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input matInput formControlName="toolIssuer" />
+          </mat-form-field>
+        </div>
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1">
+            <span class="label">Client ID</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input matInput formControlName="clientId" />
+          </mat-form-field>
+        </div>
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1">
+            <span class="label">Deployment ID</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input matInput formControlName="deploymentId" />
+          </mat-form-field>
+        </div>
+      </ng-container>
+      <div class="flex flex-column gap-1 mat-field-rounded md:col-span-2">
+        <div class="flex items-center gap-1 required">
+          <span class="label">Tool Public JWKS URL</span>
+        </div>
+        <mat-form-field class="w-full">
+          <input matInput placeholder="Type here" formControlName="toolPublicJwksUrl" />
+          <mat-error class="m-1"
+            *ngIf="ltiForm.get('toolPublicJwksUrl').hasError('required') && (ltiForm.get('toolPublicJwksUrl').dirty || ltiForm.get('toolPublicJwksUrl').touched)">This
+            field is required</mat-error>
+          <mat-error class="m-1"
+            *ngIf="ltiForm.get('toolPublicJwksUrl').hasError('invalidUrl') && (ltiForm.get('toolPublicJwksUrl').dirty || ltiForm.get('toolPublicJwksUrl').touched)">Please
+            enter a valid URL</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-column gap-1 mat-field-rounded md:col-span-2">
+        <div class="flex items-center gap-1 required">
+          <span class="label">OIDC Login Initiation URL</span>
+        </div>
+        <mat-form-field class="w-full">
+          <input matInput placeholder="Type here" formControlName="oidcLoginInitiationUrl" />
+          <mat-error class="m-1"
+            *ngIf="ltiForm.get('oidcLoginInitiationUrl').hasError('required') && (ltiForm.get('oidcLoginInitiationUrl').dirty || ltiForm.get('oidcLoginInitiationUrl').touched)">This
+            field is required</mat-error>
+          <mat-error class="m-1"
+            *ngIf="ltiForm.get('oidcLoginInitiationUrl').hasError('invalidUrl') && (ltiForm.get('oidcLoginInitiationUrl').dirty || ltiForm.get('oidcLoginInitiationUrl').touched)">Please
+            enter a valid URL</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-column gap-1 mat-field-rounded md:col-span-2">
+        <div class="flex items-center gap-1 required">
+          <span class="label">Redirect / Launch URL</span>
+        </div>
+        <mat-form-field class="w-full">
+          <input matInput placeholder="Type here" formControlName="redirectLaunchUrl" />
+          <mat-error class="m-1"
+            *ngIf="ltiForm.get('redirectLaunchUrl').hasError('required') && (ltiForm.get('redirectLaunchUrl').dirty || ltiForm.get('redirectLaunchUrl').touched)">This
+            field is required</mat-error>
+          <mat-error class="m-1"
+            *ngIf="ltiForm.get('redirectLaunchUrl').hasError('invalidUrl') && (ltiForm.get('redirectLaunchUrl').dirty || ltiForm.get('redirectLaunchUrl').touched)">Please
+            enter a valid URL</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex flex-column gap-1 mat-field-rounded md:col-span-2">
+        <div class="flex items-center gap-1">
+          <span class="label">Deep Linking URL (optional)</span>
+        </div>
+        <mat-form-field class="w-full">
+          <input matInput placeholder="Type here" formControlName="deepLinkingUrl" />
+          <mat-error class="m-1"
+            *ngIf="ltiForm.get('deepLinkingUrl').hasError('invalidUrl') && (ltiForm.get('deepLinkingUrl').dirty || ltiForm.get('deepLinkingUrl').touched)">Please
+            enter a valid URL</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="mb-3">
+      <span class="label"> Active </span>
+      <div class="flex items-center justify-between mt-2">
+        <div class="badge"
+          [ngClass]="providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'success' : 'not-tested'">
+          {{ providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'Tested' : 'Not
+          Tested'
+          }}
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

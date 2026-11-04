@@ -5,7 +5,7 @@ import { environment } from '../../../../../../../../../../src/environments/envi
 
 const API_END_POINTS = {
   CREATE_CONTENTPARTNER: `/apis/proxies/v8/contentpartner/v1/create`,
-  UPDATE_CONTENTPARTNER: `/apis/proxies/v8/contentpartner/v1/update`,
+  UPDATE_CONTENTPARTNER: `/apis/proxies/v8/contentpartner/v2/update`,
   UPLOAD_THUMBNAIL: `apis/proxies/v8/storage/v1/uploadCiosIcon`,
   UPLOAD_CIOS_CONTRACT: `/apis/proxies/v8/storage/v1/uploadCiosContract`,
   GET_PROVIDERS_LIST: `/apis/proxies/v8/contentpartner/v1/search`,
@@ -29,6 +29,7 @@ const API_END_POINTS = {
   CREATE_SSO_CONFIGURATION: (partnerId: string) => `/apis/proxies/v8/sso/create/${partnerId}`,
   UPDATE_SSO_CONFIGURATION: (partnerId: string) => `/apis/proxies/v8/sso/update/${partnerId}`,
   TEST_SSO_CONFIGURATION: `/apis/proxies/v8/sso/validateSaml`,
+  LTI_SSO_TEST: (partnerCode: string) => `/apis/proxies/v8/ciosIntegration/lti/ssotest/${partnerCode}`,
 
 
   contentRegisterSearch: `/apis/proxies/v8/contentpartner/register/v1/search`,
@@ -197,6 +198,10 @@ export class MarketplaceService {
 
   testSSOConfiguration(formBody: any) {
     return this.http.post(`${API_END_POINTS.TEST_SSO_CONFIGURATION}`, formBody)
+  }
+
+  ltiSSOTest(partnerCode: string) {
+    return this.http.get(`${API_END_POINTS.LTI_SSO_TEST(partnerCode)}`)
   }
 
   contentRegisterList(formBody: any) {
