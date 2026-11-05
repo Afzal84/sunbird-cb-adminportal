@@ -33,7 +33,7 @@ describe('MarketplaceService', () => {
   it('should update a provider', () => {
     const formBody = { licenseType: 'Course' }
     service.updateProvider(formBody)
-    expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/contentpartner/v1/update', formBody)
+    expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/contentpartner/v2/update', formBody)
   })
 
   it('should upload a thumbnail using the file from the given form data', () => {
@@ -202,6 +202,11 @@ describe('MarketplaceService', () => {
     expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/sso/update/partner-1', formBody)
   })
 
+  it('should run the LTI SSO test for a partner code', () => {
+    service.ltiSSOTest('partner-code')
+    expect(httpClient.get).toHaveBeenCalledWith('/apis/proxies/v8/ciosIntegration/lti/ssotest/partner-code')
+  })
+
   it('should test the SSO configuration', () => {
     const formBody = { samlResponse: 'response' }
     service.testSSOConfiguration(formBody)
@@ -260,6 +265,24 @@ describe('MarketplaceService', () => {
       service.downloadAssetFile('https://example.com/path/file.pdf')
 
       expect(capturedLink.download).toBe('file.pdf')
+
+      clickSpy.mockRestore()
+      appendSpy.mockRestore()
+      removeSpy.mockRestore()
+    })
+
+    it('should fall back to a default file name when the asset path has no file segment', () => {
+      const clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+      let capturedLink: any
+      const appendSpy = jest.spyOn(document.body, 'appendChild').mockImplementation((node: any) => {
+        capturedLink = node
+        return node
+      })
+      const removeSpy = jest.spyOn(document.body, 'removeChild').mockImplementation((node: any) => node)
+
+      service.downloadAssetFile('https://example.com/path/')
+
+      expect(capturedLink.download).toBe('file')
 
       clickSpy.mockRestore()
       appendSpy.mockRestore()

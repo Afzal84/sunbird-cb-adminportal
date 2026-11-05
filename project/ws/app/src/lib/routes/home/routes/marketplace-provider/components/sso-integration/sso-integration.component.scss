@@ -102,3 +102,39 @@
     }
   }
 }
+
+.lti-test-step-box {
+  border: 1px solid #00000066;
+  background: #fff;
+  color: #212529;
+}
+
+.lti-status-badge {
+  min-width: 70px;
+  text-align: center;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lti-status-pass {
+  background: #1d89231f;
+  color: #1d8923;
+}
+
+.lti-status-fail {
+  background: #d9232d1f;
+  color: #d9232d;
+}
+
+.lti-test-error {
+  border: 1px solid #d9232d;
+  background: #d9232d1f;
+  min-height: 80px;
+
+  p {
+    color: #d9232d;
+    font-style: italic;
+  }
+}

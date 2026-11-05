@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, } from '@angular/core'
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core'
 import { Clipboard } from '@angular/cdk/clipboard'
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { MarketplaceService } from '../../services/marketplace.service'
@@ -9,13 +9,15 @@ import { GlobalEventsService } from '../../../../../../../../../../../src/app/se
 import { ActivatedRoute, Router } from '@angular/router'
 import * as _ from 'lodash'
 
+export type SettingsType = 'sso' | 'LTI'
+
 @Component({
   selector: 'ws-app-sso-configure-settings',
   templateUrl: './sso-configure-settings.component.html',
   styleUrls: ['./sso-configure-settings.component.scss'],
   standalone: false
 })
-export class SsoConfigureSettingsComponent implements OnInit {
+export class SsoConfigureSettingsComponent implements OnInit, OnChanges {
   @Input() providerDetails: any
   @Output() loadSSODetails = new EventEmitter<any>()
 
@@ -27,6 +29,16 @@ export class SsoConfigureSettingsComponent implements OnInit {
     name: 'SAML', value: 'saml'
   }]
   ssoSettingsForm!: FormGroup
+
+  settingsOptions: Array<{ name: string, value: SettingsType }> = [
+    { name: 'SSO integration', value: 'sso' },
+    { name: 'LTI support', value: 'LTI' },
+  ]
+  settingsType: SettingsType = 'sso'
+  ltiForm!: FormGroup
+  // Backend-provided identity controls; added (disabled) only for a saved LTI provider
+  readonly ltiReadonlyKeys = ['ltiVersion', 'toolIssuer', 'clientId', 'deploymentId']
+  showLtiReadonlyFields = false
 
   initialFormValue: any = {}
   initialAcsUrl = ''
@@ -49,6 +61,92 @@ export class SsoConfigureSettingsComponent implements OnInit {
 
   ) {
     this.ssoSettingsForm = this.formBuilder.group({})
+    this.ltiForm = this.buildLtiForm()
+  }
+
+  buildLtiForm(): FormGroup {
+    return this.formBuilder.group({
+      toolPublicJwksUrl: ['', [Validators.required, this.urlValidator()]],
+      oidcLoginInitiationUrl: ['', [Validators.required, this.urlValidator()]],
+      redirectLaunchUrl: ['', [Validators.required, this.urlValidator()]],
+      deepLinkingUrl: ['', [this.urlValidator()]],
+    })
+  }
+
+  get activeForm(): FormGroup {
+    return this.settingsType === 'LTI' ? this.ltiForm : this.ssoSettingsForm
+  }
+
+  onSettingsChange(next: SettingsType) {
+    if (next === this.settingsType) {
+      return
+    }
+    if (this.activeForm.dirty) {
+      console.warn('Switching the settings type will result in losing unsaved changes made in the current form.')
+    }
+    this.settingsType = next
+  }
+
+  get savedProtocol(): string {
+    return `${this.providerDetails?.data?.protocol || ''}`.trim().toUpperCase()
+  }
+
+  // Once a protocol has been saved on the provider it cannot be changed
+  get isProtocolLocked(): boolean {
+    return !!this.isSavedConfiguration
+  }
+
+  get isSavedConfiguration(): boolean {
+    return this.settingsType === 'LTI' ? this.savedProtocol === 'LTI' : !!this.SSOConfigurationData
+  }
+
+  // Selects the settings type from the provider's saved `protocol`.
+  // Returns true when the provider is an LTI provider (its form is patched).
+  applyProviderProtocol(): boolean {
+    if (this.savedProtocol === 'LTI') {
+      if (!this.ltiForm.dirty) {
+        this.patchLtiForm(this.providerDetails?.data?.ltiConfiguration || {})
+      }
+      this.settingsType = 'LTI'
+      return true
+    }
+    if (this.savedProtocol) {
+      this.settingsType = 'sso'
+    }
+    return false
+  }
+
+  // Patches the editable LTI controls and, when the API returned them, adds the read-only identity controls
+  patchLtiForm(config: { [key: string]: any }) {
+    this.ltiForm.patchValue({
+      toolPublicJwksUrl: config['toolPublicJwksUrl'] ?? '',
+      oidcLoginInitiationUrl: config['oidcLoginInitiationUrl'] ?? '',
+      redirectLaunchUrl: config['redirectLaunchUrl'] ?? '',
+      deepLinkingUrl: config['deepLinkingUrl'] ?? '',
+    })
+    this.ltiReadonlyKeys.forEach(key => {
+      if (!config[key]) {
+        return
+      }
+      if (!this.ltiForm.get(key)) {
+        this.ltiForm.addControl(key, new FormControl({ value: config[key], disabled: true }))
+      } else {
+        this.ltiForm.get(key)!.setValue(config[key])
+      }
+    })
+    this.showLtiReadonlyFields = this.savedProtocol === 'LTI' && this.ltiReadonlyKeys.some(key => !!this.ltiForm.get(key))
+    this.ltiForm.markAsPristine()
+  }
+
+  get canSaveLti(): boolean {
+    // Validity is checked on click so that errors are shown for an invalid save attempt
+    return this.ltiForm.dirty
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['providerDetails'] && !changes['providerDetails'].firstChange) {
+      this.applyProviderProtocol()
+    }
   }
 
   ngOnInit(): void {
@@ -116,6 +214,9 @@ export class SsoConfigureSettingsComponent implements OnInit {
   }
 
   get isSaveDisabled(): boolean {
+    if (this.settingsType === 'LTI') {
+      return !this.ltiForm.dirty
+    }
     const currentForm = this.ssoSettingsForm.getRawValue()
     return JSON.stringify(currentForm) === JSON.stringify(this.initialFormValue) &&
       this.acsUrl.value === this.initialAcsUrl &&
@@ -140,6 +241,10 @@ export class SsoConfigureSettingsComponent implements OnInit {
 
   fetchSSOSettings() {
     if (this.providerDetails && this.providerDetails.id) {
+      if (this.applyProviderProtocol()) {
+        // LTI provider: SSO configuration is not applicable, so skip the SSO API
+        return
+      }
       this.loaderService.setLoaderState(true)
       this.ssoSettingsForm.controls['partnerName'].setValue(this.providerDetails?.data?.contentPartnerName || '')
       this.ssoSettingsForm.controls['partnerName'].disable()

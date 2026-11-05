@@ -3,7 +3,7 @@
     <ws-app-help-center-guide-v2 [helpCenterGuide]="helpCenterGuide"></ws-app-help-center-guide-v2>
   </div>
   <div class="flex justify-between items-center mb-4">
-    <p class="page-title">SSO Integration</p>
+    <p class="page-title">Integration</p>
     <div class="actions-buttons-sso flex items-center gap-4">
       <!-- <button
         mat-flat-button
@@ -23,7 +23,7 @@
       <ng-container *ngIf="selectedTabIndex !== 1">
         <button [disabled]="!canSave" [ngClass]="{'disable-btn': !canSave}" (click)="updateCreateSSO()" mat-flat-button
           class="flex items-center rounded-full px-4 py-2 btn-primaryr font-bold text-sm mat-btn-flat mat-btn-height-32">
-          {{ ssoConfigurationSettings && ssoConfigurationSettings?.SSOConfigurationData ? 'Update' : 'Save' }}
+          {{ ssoConfigurationSettings?.isSavedConfiguration ? 'Update' : 'Save' }}
         </button>
       </ng-container>
     </div>
@@ -36,14 +36,21 @@
         (loadSSODetails)="loadSSODetails($event)"></ws-app-sso-configure-settings>
     </mat-tab>
     <mat-tab label="Test & Preview">
-      <ng-container>
-        <div class="test-sso-connection wrapper-border p-4 bg-white rounded-lg flex-1 mt-4">
-          <p class="page-title">Test SSO Connections</p>
-          <p class="text-sm section-title mb-6 mt-2">
-            Verify your SSO configuration before going live
-          </p>
+      <!-- <ng-container *ngTemplateOutlet="isLtiSelected ? ltiTestTemplate : ssoTestTemplate"></ng-container> -->
+      <ng-container *ngTemplateOutlet="ssoTestTemplate"></ng-container>
+    </mat-tab>
+    <!-- <mat-tab label="Documentation"> Content 3 </mat-tab> -->
+  </mat-tab-group>
+</div>
 
-          <!-- <div class="email-failed-box p-4 rounded-lg">
+<ng-template #ssoTestTemplate>
+  <div class="test-sso-connection wrapper-border p-4 bg-white rounded-lg flex-1 mt-4">
+    <p class="page-title">Test {{ providerDetails?.data?.protocol === 'LTI' ? 'LTI' : 'SSO' }} Connections</p>
+    <p class="text-sm section-title mb-6 mt-2">
+      Verify your {{ providerDetails?.data?.protocol === 'LTI' ? 'LTI' : 'SSO' }} configuration before going live
+    </p>
+
+    <!-- <div class="email-failed-box p-4 rounded-lg">
             <div class="flex gap-2">
               <mat-icon svgIcon="alert_i"></mat-icon>
               <div class="info">
@@ -55,34 +62,52 @@
             </div>
           </div> -->
 
-          <!-- Test SSO Button  -->
-          <ng-container *ngIf="!isSSOSuccessfullyConfigured">
-            <button [disabled]="!ssoConfigurations?.ssoTestUrl" (click)="testSsoUrl()" mat-flat-button
-              class="flex items-center rounded-full px-4 py-2 mat-btn-flat mat-btn-height-32 w-full my-8">
-              Test SSO Connection
-            </button>
-          </ng-container>
+    <!-- Test SSO Button  -->
+    <ng-container *ngIf="!isSSOSuccessfullyConfigured">
+      <button [disabled]="!enableTestSSOButton" (click)="testSsoUrl()" mat-flat-button
+        class="flex items-center rounded-full px-4 py-2 mat-btn-flat mat-btn-height-32 w-full my-8">
+        {{ providerDetails?.data?.protocol === 'LTI' ? 'Test LTI Configuration' : 'Test SSO Connection' }}
+      </button>
+    </ng-container>
 
-          <!-- Success SSO Message  -->
-          <ng-container *ngIf="isSSOSuccessfullyConfigured">
-            <div class="success-sso-message p-4 rounded-lg">
-              <div class="flex gap-3">
-                <mat-icon svgIcon="verified_tick"></mat-icon>
-                <div class="info">
-                  <div class="mb-3">
-                    <p class="info-title">Test Successful!</p>
-                    <p class="text-sm section-title mt-2 mb-0">
-                      SSO authentication completed successfully. User attributes received and mapped
-                      correctly.
-                    </p>
-                  </div>
-                </div>
-              </div>
+    <!-- Success SSO Message  -->
+    <ng-container *ngIf="isSSOSuccessfullyConfigured">
+      <div class="success-sso-message p-4 rounded-lg">
+        <div class="flex gap-3">
+          <mat-icon svgIcon="verified_tick"></mat-icon>
+          <div class="info">
+            <div class="mb-3">
+              <p class="info-title">Test Successful!</p>
+              <p class="text-sm section-title mt-2 mb-0">
+                {{ providerDetails?.data?.protocol === 'LTI' ? 'LTI' : 'SSO' }} authentication completed successfully.
+                User attributes received and mapped
+                correctly.
+              </p>
             </div>
-          </ng-container>
+          </div>
         </div>
-      </ng-container>
-    </mat-tab>
-    <!-- <mat-tab label="Documentation"> Content 3 </mat-tab> -->
-  </mat-tab-group>
-</div>
+      </div>
+    </ng-container>
+  </div>
+</ng-template>
+
+<!-- <ng-template #ltiTestTemplate>
+  <div class="test-lti-connection wrapper-border p-4 bg-white rounded-lg flex-1 mt-4">
+    <button mat-flat-button
+      class="flex items-center rounded-full px-4 py-2 btn-primaryr font-bold text-sm mat-btn-flat mat-btn-height-32 mb-4">
+      Run Test Launch
+    </button>
+
+    <div *ngFor="let step of ltiTestSteps; let i = index"
+      class="lti-test-step flex items-center justify-between gap-4 mb-3">
+      <div class="lti-test-step-box flex-1 p-4 rounded-lg text-sm">{{ i + 1 }}. {{ step.displayText }}</div>
+      <span class="lti-status-badge" [ngClass]="step.isPass ? 'lti-status-pass' : 'lti-status-fail'">
+        {{ step.isPass ? 'Passed' : 'Failed' }}
+      </span>
+    </div>
+
+    <div *ngIf="hasLtiTestFailure" class="lti-test-error p-4 rounded-lg mt-4">
+      <p class="text-sm mb-0">{{ ltiTestErrorMessage }}</p>
+    </div>
+  </div>
+</ng-template> -->
