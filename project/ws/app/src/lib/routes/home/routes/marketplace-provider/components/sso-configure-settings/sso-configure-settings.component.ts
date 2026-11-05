@@ -93,7 +93,7 @@ export class SsoConfigureSettingsComponent implements OnInit, OnChanges {
 
   // Once a protocol has been saved on the provider it cannot be changed
   get isProtocolLocked(): boolean {
-    return !!this.savedProtocol
+    return !!this.isSavedConfiguration
   }
 
   get isSavedConfiguration(): boolean {

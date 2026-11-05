@@ -129,12 +129,23 @@ describe('SsoConfigureSettingsComponent', () => {
     expect(component.isSavedConfiguration).toBe(false)
   })
 
-  it('locks the protocol for a saved non-LTI provider and keeps SSO behaviour', () => {
+  it('locks the protocol for a non-LTI provider once an SSO configuration is saved', () => {
+    marketplaceService.getSSOConfiguration.mockReturnValue(of({
+      params: { status: 'success' },
+      result: { ssoData: { clientId: 'c1', ssoUrl: 'https://example.com/sso', ssoProtocol: 'saml', mappers: [] } },
+    }))
     component.providerDetails = { id: 'p1', data: { protocol: 'SSO' } }
     component.fetchSSOSettings()
     expect(component.isProtocolLocked).toBe(true)
     expect(component.settingsType).toBe('sso')
     expect(marketplaceService.getSSOConfiguration).toHaveBeenCalled()
+  })
+
+  it('does not lock the protocol for a non-LTI provider without a saved SSO configuration', () => {
+    component.providerDetails = { id: 'p1', data: { protocol: 'SSO' } }
+    component.fetchSSOSettings()
+    expect(component.isProtocolLocked).toBe(false)
+    expect(component.settingsType).toBe('sso')
   })
 
   it('patches the SSO form from a saved SSO configuration', () => {

@@ -111,7 +111,7 @@
   <div [formGroup]="ssoSettingsForm">
     <div class="sso-form-settings">
       <div class="pb-4 b-seperator">
-        <div class="flex flex-column gap-1 mat-field-rounded">
+        <!-- <div class="flex flex-column gap-1 mat-field-rounded">
           <div class="flex items-center gap-1 required">
             <span class="label">SSO Protocol</span>
           </div>
@@ -127,7 +127,7 @@
                       ssoSettingsForm.get('ssoProtocol').touched)
                   ">This field is required</mat-error>
           </mat-form-field>
-        </div>
+        </div> -->
 
         <div class="flex flex-column gap-1 mat-field-rounded">
           <div class="flex items-center gap-1 required">
@@ -328,16 +328,18 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="mb-3">
-      <span class="label"> Active </span>
-      <div class="flex items-center justify-between mt-2">
-        <div class="badge"
-          [ngClass]="providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'success' : 'not-tested'">
-          {{ providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'Tested' : 'Not
-          Tested'
-          }}
+    <ng-container *ngIf="providerDetails?.data?.ltiConfiguration">
+      <div class="mb-3">
+        <span class="label"> Active</span>
+        <div class="flex items-center justify-between mt-2">
+          <div class="badge"
+            [ngClass]="providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'success' : 'not-tested'">
+            {{ providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'Tested' : 'Not
+            Tested'
+            }}
+          </div>
         </div>
       </div>
-    </div>
+    </ng-container>
   </div>
 </ng-template>
