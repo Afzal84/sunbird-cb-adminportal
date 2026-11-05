@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs'
 import { environment } from '../../../../../../../../../../src/environments/environment'
 
 const API_END_POINTS = {
-  CREATE_CONTENTPARTNER: `/apis/proxies/v8/contentpartner/v1/create`,
+  CREATE_CONTENTPARTNER: `/apis/proxies/v8/contentpartner/v2/create`,
   UPDATE_CONTENTPARTNER: `/apis/proxies/v8/contentpartner/v2/update`,
   UPLOAD_THUMBNAIL: `apis/proxies/v8/storage/v1/uploadCiosIcon`,
   UPLOAD_CIOS_CONTRACT: `/apis/proxies/v8/storage/v1/uploadCiosContract`,

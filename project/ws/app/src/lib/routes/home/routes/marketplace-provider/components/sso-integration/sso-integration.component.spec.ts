@@ -384,6 +384,25 @@ describe('SsoIntegrationComponent', () => {
       expect(marketplaceService.updateProvider.mock.calls[0][0].data.isAuthenticate).toBeUndefined()
     })
 
+    it('should default the test status to Failed when the OK response has no status', () => {
+      component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
+      marketplaceService.ltiSSOTest.mockReturnValue(of({ responseCode: 'OK' }))
+      component.testLtiConfiguration(dialogRef)
+      const payload = marketplaceService.updateProvider.mock.calls[0][0]
+      expect(payload.data.ltiConfiguration.ssoTestStatus).toBe('Failed')
+      expect(payload.data.isAuthenticate).toBeUndefined()
+      expect(dialogRef.close).toHaveBeenCalled()
+    })
+
+    it('should show the saved LTI message from the update response on success', () => {
+      component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
+      marketplaceService.updateProvider.mockReturnValue(of({
+        responseCode: 'OK', result: { data: { ltiConfiguration: { message: 'Launch verified' } } },
+      }))
+      component.testLtiConfiguration(dialogRef)
+      expect(snackBar.openFromComponent.mock.calls[0][1].data).toEqual({ message: 'Launch verified', type: 'success' })
+    })
+
     it('should use the backend error message when provided', () => {
       component.providerDetails = { id: 'p1', data: { partnerCode: 'pc', ltiConfiguration: ltiConfiguration() } }
       marketplaceService.ltiSSOTest.mockReturnValue(of({ responseCode: 'OK', params: { status: 'Failed', errmsg: 'nonce' } }))

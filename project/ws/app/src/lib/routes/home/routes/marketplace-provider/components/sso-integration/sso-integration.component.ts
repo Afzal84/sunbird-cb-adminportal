@@ -250,7 +250,7 @@ export class SsoIntegrationComponent implements OnInit {
         let errorMessage = 'LTI configuration test failed'
         let status = 'Failed'
         if (testResponse?.responseCode === 'OK') {
-          status = _.get(testResponse, 'params.status', false)
+          status = _.get(testResponse, 'params.status', 'Failed')
           errorMessage = _.get(testResponse, 'params.errmsg', errorMessage)
         }
         if (providerPayload.data?.ltiConfiguration) {
@@ -271,7 +271,8 @@ export class SsoIntegrationComponent implements OnInit {
         if (response?.responseCode !== 'OK') {
           this.showSnackBar('LTI test failed', 'error')
         } else {
-          this.showSnackBar('LTI test passed', 'success')
+          const message = _.get(response, 'result.data.ltiConfiguration.message', 'LTI test passed')
+          this.showSnackBar(message, 'success')
         }
       },
       error: (error: HttpErrorResponse) => {
