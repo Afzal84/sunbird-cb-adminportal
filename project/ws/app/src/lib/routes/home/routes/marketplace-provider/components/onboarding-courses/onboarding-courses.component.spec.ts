@@ -40,4 +40,8 @@ describe('OnboardingCoursesComponent', () => {
   it('should not fetch table data when providerDetails is not set', () => {
     expect(marketPlaceSvc.getContentList).not.toHaveBeenCalled()
   })
+
+  it('should disable pagination for upload status', () => {
+    expect(component.contentTableData.showPagination).toBe(false)
+  })
 })

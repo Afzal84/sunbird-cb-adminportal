@@ -327,11 +327,23 @@
 }
 
 .delete-all {
+  flex: 0 0 auto;
+  margin-right: 6px;
+  white-space: nowrap;
+
+  .delete-all-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   mat-icon {
     color: #fff !important;
     font-size: 16px;
     width: 16px;
     height: 18px;
+    margin: 0;
+    flex-shrink: 0;
   }
 }
 

@@ -15,7 +15,7 @@
           <div class="courses-table mt-4">
             <ng-container *ngIf="!showUploadedStatusLoader; else showLoader">
               <ws-app-courses-list-table [coursesList]="uploadedContentList" [tableData]="contentTableData"
-                [menuItems]="contenetMenuItems" [paginationDetails]="defaultPagination"
+                [menuItems]="contenetMenuItems" [paginationDetails]="defaultPagination" (pageChange)="getContentList()"
                 (actionTriggered)="contentEvents($event)"></ws-app-courses-list-table>
             </ng-container>
           </div>
@@ -27,6 +27,7 @@
             <ng-container *ngIf="!showPublishedCoursesLoader; else showLoader">
               <ws-app-courses-list-table [coursesList]="publishedCoursesList" [tableData]="publishedCoursesTableData"
                 [paginationDetails]="publishedCoursesTablePaginationDetails"
+                (pageChange)="pageChange($event, 'published')"
                 (actionTriggered)="contentEvents($event)"></ws-app-courses-list-table>
             </ng-container>
           </div>
@@ -39,6 +40,7 @@
               <ws-app-courses-list-table [coursesList]="unPublishedCoursesList"
                 [tableData]="unPublishedCoursesTableData" [menuItems]="unpublishedCoursesMenuItems"
                 [paginationDetails]="unPublishedCoursesTablePaginationDetails"
+                (pageChange)="pageChange($event, 'notPublished')"
                 (actionTriggered)="contentEvents($event)"></ws-app-courses-list-table>
             </ng-container>
           </div>

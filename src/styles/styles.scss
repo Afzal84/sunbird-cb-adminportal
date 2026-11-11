@@ -1063,3 +1063,9 @@ input.mat-input-element {
   color: #fff !important;
 }
 
+// Keep the shared pagination page-size field within its 40px host.
+ws-widget-pagination .pagination-size-select.mat-full-radius-select mat-form-field {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+}
+
