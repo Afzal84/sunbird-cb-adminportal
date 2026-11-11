@@ -52,7 +52,7 @@
     "@sunbird-cb/rain-dashboards": "0.0.1-ang-17-20",
     "@sunbird-cb/resolver-v2": "0.0.1-ang-17-20",
     "@sunbird-cb/taxonomy-editor": "0.0.1-ang-17-20",
-    "@sunbird-cb/tree-hierarchy": "0.0.8-ang-17-20",
+    "@sunbird-cb/tree-hierarchy": "0.1.0-cbrelease-4.8.42",
     "@sunbird-cb/utils-v2": "0.0.4-ang-17-20",
     "@types/file-saver": "^2.0.1",
     "@types/jest": "29.5.13",
