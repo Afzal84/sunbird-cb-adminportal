@@ -13,7 +13,7 @@ describe('OnboardingCoursesComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should enable pagination for upload status', () => {
-    expect(component.contentTableData.showPagination).toBe(true);
+  it('should disable pagination for upload status', () => {
+    expect(component.contentTableData.showPagination).toBe(false);
   });
 });
