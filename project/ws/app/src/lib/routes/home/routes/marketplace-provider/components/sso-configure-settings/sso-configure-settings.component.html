@@ -48,9 +48,10 @@
             <input class="input-ellipse" #callbackUrl matInput placeholder="Type here" [formControl]="acsUrl" />
             <mat-icon matSuffix (click)="copy('callback', callbackUrl.value)" matTooltipPosition="above"
               [matTooltip]="callbackUrlCopied ? 'Copied' : 'Copy'" [svgIcon]="'content_copy'"></mat-icon>
-            <mat-error class="m-1" *ngIf="acsUrl.hasError('required') && (acsUrl.dirty || acsUrl.touched)">This field is
+            <mat-error class="m-1" *ngIf="acsUrl?.hasError('required') && (acsUrl?.dirty || acsUrl?.touched)">This field
+              is
               required</mat-error>
-            <mat-error class="m-1" *ngIf="acsUrl.hasError('invalidUrl') && (acsUrl.dirty || acsUrl.touched)">Please
+            <mat-error class="m-1" *ngIf="acsUrl?.hasError('invalidUrl') && (acsUrl?.dirty || acsUrl?.touched)">Please
               enter
               a valid URL</mat-error>
           </mat-form-field>
@@ -65,10 +66,11 @@
             <mat-icon matSuffix (click)="copy('redirect', redirectUrl.value)" matTooltipPosition="above"
               [matTooltip]="redirectUrlCopied ? 'Copied' : 'Copy'" [svgIcon]="'content_copy'"></mat-icon>
             <mat-error class="m-1"
-              *ngIf="ssoTestUrl.hasError('required') && (ssoTestUrl.dirty || ssoTestUrl.touched)">This field is
+              *ngIf="ssoTestUrl?.hasError('required') && (ssoTestUrl?.dirty || ssoTestUrl?.touched)">This field is
               required</mat-error>
             <mat-error class="m-1"
-              *ngIf="ssoTestUrl.hasError('invalidUrl') && (ssoTestUrl.dirty || ssoTestUrl.touched)">Please enter a valid
+              *ngIf="ssoTestUrl?.hasError('invalidUrl') && (ssoTestUrl?.dirty || ssoTestUrl?.touched)">Please enter a
+              valid
               URL</mat-error>
           </mat-form-field>
         </div>
@@ -79,8 +81,8 @@
           <div class="mb-3">
             <span class="label"> Status </span>
             <div class="flex items-center justify-between mt-2">
-              <div class="badge" [ngClass]="status.value ? 'success' : 'not-tested'">
-                {{ status.value ? 'Enabled' : 'Disabled' }}
+              <div class="badge" [ngClass]="status?.value ? 'success' : 'not-tested'">
+                {{ status?.value ? 'Enabled' : 'Disabled' }}
               </div>
               <mat-slide-toggle [formControl]="status"></mat-slide-toggle>
             </div>
@@ -131,20 +133,6 @@
               </div>
             </div>
           </div>
-
-          <!-- <ng-container *ngIf="providerDetails?.data?.ltiConfiguration">
-            <div class="mb-3">
-              <span class="label"> Active</span>
-              <div class="flex items-center justify-between mt-2">
-                <div class="badge"
-                  [ngClass]="providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'success' : 'not-tested'">
-                  {{ providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'Tested' : 'Not
-                  Tested'
-                  }}
-                </div>
-              </div>
-            </div>
-          </ng-container> -->
         </div>
       </div>
     </ng-template>
