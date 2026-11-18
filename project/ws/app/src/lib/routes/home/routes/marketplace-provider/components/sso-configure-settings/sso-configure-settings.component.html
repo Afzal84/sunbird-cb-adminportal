@@ -35,75 +35,119 @@
     </div>
   </ng-container>
 
-  <div class="meta-info-section" *ngIf="settingsType === 'sso'">
-    <div class="sso-provider-meta wrapper-border p-4 bg-white rounded-lg">
-      <p class="sub-heading-title mb-4">Service Provider Info</p>
+  <div class="meta-info-section">
+    <ng-container *ngIf="settingsType === 'sso'; else ltiMetaTemplate">
+      <div class="sso-provider-meta wrapper-border p-4 bg-white rounded-lg">
+        <p class="sub-heading-title mb-4">Service Provider Info</p>
 
-      <div class="flex flex-column gap-1 mat-field-rounded">
-        <div class="flex items-center gap-1 required">
-          <span class="meta-label">ACS URL</span>
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1 required">
+            <span class="meta-label">ACS URL</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input class="input-ellipse" #callbackUrl matInput placeholder="Type here" [formControl]="acsUrl" />
+            <mat-icon matSuffix (click)="copy('callback', callbackUrl.value)" matTooltipPosition="above"
+              [matTooltip]="callbackUrlCopied ? 'Copied' : 'Copy'" [svgIcon]="'content_copy'"></mat-icon>
+            <mat-error class="m-1" *ngIf="acsUrl.hasError('required') && (acsUrl.dirty || acsUrl.touched)">This field is
+              required</mat-error>
+            <mat-error class="m-1" *ngIf="acsUrl.hasError('invalidUrl') && (acsUrl.dirty || acsUrl.touched)">Please
+              enter
+              a valid URL</mat-error>
+          </mat-form-field>
         </div>
-        <mat-form-field class="w-full">
-          <input class="input-ellipse" #callbackUrl matInput placeholder="Type here" [formControl]="acsUrl" />
-          <mat-icon matSuffix (click)="copy('callback', callbackUrl.value)" matTooltipPosition="above"
-            [matTooltip]="callbackUrlCopied ? 'Copied' : 'Copy'" [svgIcon]="'content_copy'"></mat-icon>
-          <mat-error class="m-1" *ngIf="acsUrl.hasError('required') && (acsUrl.dirty || acsUrl.touched)">This field is
-            required</mat-error>
-          <mat-error class="m-1" *ngIf="acsUrl.hasError('invalidUrl') && (acsUrl.dirty || acsUrl.touched)">Please enter
-            a valid URL</mat-error>
-        </mat-form-field>
+
+        <div class="flex flex-column gap-1 mat-field-rounded">
+          <div class="flex items-center gap-1 required">
+            <span class="meta-label">Redirect URL</span>
+          </div>
+          <mat-form-field class="w-full">
+            <input class="input-ellipse" #redirectUrl matInput placeholder="Type here" [formControl]="ssoTestUrl" />
+            <mat-icon matSuffix (click)="copy('redirect', redirectUrl.value)" matTooltipPosition="above"
+              [matTooltip]="redirectUrlCopied ? 'Copied' : 'Copy'" [svgIcon]="'content_copy'"></mat-icon>
+            <mat-error class="m-1"
+              *ngIf="ssoTestUrl.hasError('required') && (ssoTestUrl.dirty || ssoTestUrl.touched)">This field is
+              required</mat-error>
+            <mat-error class="m-1"
+              *ngIf="ssoTestUrl.hasError('invalidUrl') && (ssoTestUrl.dirty || ssoTestUrl.touched)">Please enter a valid
+              URL</mat-error>
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="flex flex-column gap-1 mat-field-rounded">
-        <div class="flex items-center gap-1 required">
-          <span class="meta-label">Redirect URL</span>
-        </div>
-        <mat-form-field class="w-full">
-          <input class="input-ellipse" #redirectUrl matInput placeholder="Type here" [formControl]="ssoTestUrl" />
-          <mat-icon matSuffix (click)="copy('redirect', redirectUrl.value)" matTooltipPosition="above"
-            [matTooltip]="redirectUrlCopied ? 'Copied' : 'Copy'" [svgIcon]="'content_copy'"></mat-icon>
-          <mat-error class="m-1"
-            *ngIf="ssoTestUrl.hasError('required') && (ssoTestUrl.dirty || ssoTestUrl.touched)">This field is
-            required</mat-error>
-          <mat-error class="m-1"
-            *ngIf="ssoTestUrl.hasError('invalidUrl') && (ssoTestUrl.dirty || ssoTestUrl.touched)">Please enter a valid
-            URL</mat-error>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div class="mt-4 wrapper-border p-4 bg-white rounded-lg">
-      <div class="sso-status">
-        <div class="mb-3">
-          <span class="label"> Status </span>
-          <div class="flex items-center justify-between mt-2">
-            <div class="badge" [ngClass]="status.value ? 'success' : 'not-tested'">
-              {{ status.value ? 'Enabled' : 'Disabled' }}
-            </div>
-            <mat-slide-toggle [formControl]="status"></mat-slide-toggle>
-          </div>
-        </div>
-        <div class="mb-3">
-          <span class="label"> Configuration </span>
-          <div class="flex items-center justify-between mt-2">
-            <div class="badge" [ngClass]="
-                SSOConfigurationData?.configuration === 'completed' ? 'success' : 'incomplete'
-              ">
-              {{ SSOConfigurationData?.configuration || 'incomplete' }}
+      <div class="mt-4 wrapper-border p-4 bg-white rounded-lg">
+        <div class="sso-status">
+          <div class="mb-3">
+            <span class="label"> Status </span>
+            <div class="flex items-center justify-between mt-2">
+              <div class="badge" [ngClass]="status.value ? 'success' : 'not-tested'">
+                {{ status.value ? 'Enabled' : 'Disabled' }}
+              </div>
+              <mat-slide-toggle [formControl]="status"></mat-slide-toggle>
             </div>
           </div>
-        </div>
+          <div class="mb-3">
+            <span class="label"> Configuration </span>
+            <div class="flex items-center justify-between mt-2">
+              <div class="badge" [ngClass]="
+                  SSOConfigurationData?.configuration === 'completed' ? 'success' : 'incomplete'
+                ">
+                {{ SSOConfigurationData?.configuration || 'incomplete' }}
+              </div>
+            </div>
+          </div>
 
-        <div class="mb-3">
-          <span class="label"> Active </span>
-          <div class="flex items-center justify-between mt-2">
-            <div class="badge" [ngClass]="SSOConfigurationData?.ssoTested ? 'success' : 'not-tested'">
-              {{ SSOConfigurationData?.ssoTested ? 'Tested' : 'Not Tested' }}
+          <div class="mb-3">
+            <span class="label"> Active </span>
+            <div class="flex items-center justify-between mt-2">
+              <div class="badge" [ngClass]="SSOConfigurationData?.ssoTested ? 'success' : 'not-tested'">
+                {{ SSOConfigurationData?.ssoTested ? 'Tested' : 'Not Tested' }}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </ng-container>
+    <ng-template #ltiMetaTemplate>
+      <div class="wrapper-border p-4 bg-white rounded-lg">
+        <div class="sso-status">
+          <div class="mb-3">
+            <span class="label"> Configuration </span>
+            <div class="flex items-center justify-between mt-2">
+              <div class="badge" [ngClass]="
+                        providerDetails?.data?.ltiConfiguration ? 'success' : 'incomplete'
+                      ">
+                {{ providerDetails?.data?.ltiConfiguration ? 'Completed' : 'Incomplete' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <span class="label"> Active </span>
+            <div class="flex items-center justify-between mt-2">
+              <div class="badge"
+                [ngClass]="providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'success' : 'not-tested'">
+                {{ providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'Tested' : 'Not
+                Tested' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- <ng-container *ngIf="providerDetails?.data?.ltiConfiguration">
+            <div class="mb-3">
+              <span class="label"> Active</span>
+              <div class="flex items-center justify-between mt-2">
+                <div class="badge"
+                  [ngClass]="providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'success' : 'not-tested'">
+                  {{ providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'Tested' : 'Not
+                  Tested'
+                  }}
+                </div>
+              </div>
+            </div>
+          </ng-container> -->
+        </div>
+      </div>
+    </ng-template>
   </div>
 </div>
 
@@ -318,7 +362,7 @@
       </div>
       <div class="flex flex-column gap-1 mat-field-rounded md:col-span-2">
         <div class="flex items-center gap-1">
-          <span class="label">Deep Linking URL (optional)</span>
+          <span class="label">Deep Linking URL</span>
         </div>
         <mat-form-field class="w-full">
           <input matInput placeholder="Type here" formControlName="deepLinkingUrl" />
@@ -328,18 +372,5 @@
         </mat-form-field>
       </div>
     </div>
-    <ng-container *ngIf="providerDetails?.data?.ltiConfiguration">
-      <div class="mb-3">
-        <span class="label"> Active</span>
-        <div class="flex items-center justify-between mt-2">
-          <div class="badge"
-            [ngClass]="providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'success' : 'not-tested'">
-            {{ providerDetails?.data?.ltiConfiguration?.ssoTestStatus?.toLowerCase() === 'success' ? 'Tested' : 'Not
-            Tested'
-            }}
-          </div>
-        </div>
-      </div>
-    </ng-container>
   </div>
 </ng-template>
