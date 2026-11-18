@@ -27,7 +27,7 @@ describe('MarketplaceService', () => {
   it('should create a provider', () => {
     const formBody = { licenseType: 'User' }
     service.createProvider(formBody)
-    expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/contentpartner/v1/create', formBody)
+    expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/contentpartner/v2/create', formBody)
   })
 
   it('should update a provider', () => {
