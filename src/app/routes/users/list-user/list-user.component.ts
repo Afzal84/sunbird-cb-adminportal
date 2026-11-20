@@ -37,13 +37,13 @@ export class ListUserComponent implements OnInit {
   userStatus: UserStatus = 'active'
   selectedOrg: IOrganization | null = null
   hasSearched = false
-  private statusUpdateUserIds = new Set<string>()
+  private readonly statusUpdateUserIds = new Set<string>()
 
   constructor(
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private usersService: UsersService,
-    private homeUsersService: HomeUsersService,
+    private readonly homeUsersService: HomeUsersService,
     private configSvc: ConfigurationsService,
   ) { }
 
@@ -268,7 +268,7 @@ export class ListUserComponent implements OnInit {
   private updateUserStatus(user: IUserProfile, activate: boolean): void {
     if (this.statusUpdateUserIds.has(user.userId)) { return }
 
-    const loggedInUserId = (this.configSvc.userProfile as any)?.userId || ''
+    const loggedInUserId = (this.configSvc.userProfile as any)?.userId ?? ''
     this.statusUpdateUserIds.add(user.userId)
 
     const request$ = activate
@@ -287,7 +287,7 @@ export class ListUserComponent implements OnInit {
       (err: any) => {
         this.statusUpdateUserIds.delete(user.userId)
         this.snackBar.open(
-          err?.error?.params?.errmsg || `Failed to ${activate ? 'activate' : 'deactivate'} user`,
+          err?.error?.params?.errmsg ?? `Failed to ${activate ? 'activate' : 'deactivate'} user`,
           'X',
           { duration: 5000, panelClass: ['error'] },
         )

@@ -18,6 +18,10 @@ describe('ListUserComponent status actions', () => {
     newBlockUserKong: jest.Mock
     newUnBlockUserKong: jest.Mock
   }
+  let configSvc: {
+    userProfile: { userId: string } | null
+    userRoles: Set<string>
+  }
 
   const activeUser: IUserProfile = {
     userId: 'active-user',
@@ -35,16 +39,17 @@ describe('ListUserComponent status actions', () => {
       newBlockUserKong: jest.fn(),
       newUnBlockUserKong: jest.fn(),
     }
+    configSvc = {
+      userProfile: { userId: 'logged-in-user' },
+      userRoles: new Set(['spv_admin']),
+    }
 
     component = new ListUserComponent(
       { open: jest.fn() } as unknown as MatDialog,
       snackBar as unknown as MatSnackBar,
       { getUsers: jest.fn() } as unknown as UsersService,
       homeUsersService as unknown as ConstructorParameters<typeof ListUserComponent>[3],
-      {
-        userProfile: { userId: 'logged-in-user' },
-        userRoles: new Set(['spv_admin']),
-      } as unknown as ConfigurationsService,
+      configSvc as unknown as ConfigurationsService,
     )
   })
 
@@ -113,5 +118,34 @@ describe('ListUserComponent status actions', () => {
     component.onUserAction({ action: 'activate', user: inactiveUser })
 
     expect(homeUsersService.newUnBlockUserKong).toHaveBeenCalledTimes(2)
+  })
+
+  it('uses an empty requestedBy value when the logged-in user ID is unavailable', () => {
+    configSvc.userProfile = null
+    homeUsersService.newUnBlockUserKong.mockReturnValue(of({}))
+    jest.spyOn(component as any, 'refreshAfterDelay').mockImplementation()
+
+    component.onUserAction({ action: 'activate', user: inactiveUser })
+
+    expect(homeUsersService.newUnBlockUserKong).toHaveBeenCalledWith('', 'inactive-user')
+  })
+
+  it('shows the default status errors when the API does not return a message', () => {
+    homeUsersService.newUnBlockUserKong.mockReturnValue(throwError({}))
+    homeUsersService.newBlockUserKong.mockReturnValue(throwError({}))
+    const refreshSpy = jest.spyOn(component as any, 'refreshAfterDelay').mockImplementation()
+
+    component.onUserAction({ action: 'activate', user: inactiveUser })
+    component.onUserAction({ action: 'deactivate', user: activeUser })
+
+    expect(snackBar.open).toHaveBeenCalledWith('Failed to activate user', 'X', {
+      duration: 5000,
+      panelClass: ['error'],
+    })
+    expect(snackBar.open).toHaveBeenCalledWith('Failed to deactivate user', 'X', {
+      duration: 5000,
+      panelClass: ['error'],
+    })
+    expect(refreshSpy).not.toHaveBeenCalled()
   })
 })
