@@ -1,9 +1,12 @@
+jest.mock('@ws/app/src/lib/routes/home/services/users.service', () => ({
+  UsersService: class MockHomeUsersService { },
+}), { virtual: true })
+
 import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { of, Subject, throwError } from 'rxjs'
 
-import { UsersService as HomeUsersService } from '@ws/app/src/lib/routes/home/services/users.service'
 import { IUserProfile } from '../models/users.models'
 import { UsersService } from '../users.service'
 import { ListUserComponent } from './list-user.component'
@@ -37,7 +40,7 @@ describe('ListUserComponent status actions', () => {
       { open: jest.fn() } as unknown as MatDialog,
       snackBar as unknown as MatSnackBar,
       { getUsers: jest.fn() } as unknown as UsersService,
-      homeUsersService as unknown as HomeUsersService,
+      homeUsersService as unknown as ConstructorParameters<typeof ListUserComponent>[3],
       {
         userProfile: { userId: 'logged-in-user' },
         userRoles: new Set(['spv_admin']),
