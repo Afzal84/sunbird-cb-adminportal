@@ -14,6 +14,7 @@ import { PasswordResetDialogComponent } from './dialogs/password-reset-dialog/pa
 import { UserMigrationDialogComponent } from './dialogs/user-migration-dialog/user-migration-dialog.component'
 import { UserStatusUpdateDialogComponent } from './dialogs/user-status-update-dialog/user-status-update-dialog.component'
 import { HelpDialogComponent } from '../shared/help-dialog/help-dialog.component'
+import { UsersService as HomeUsersService } from '@ws/app/src/lib/routes/home/services/users.service'
 
 @Component({
   standalone: false,
@@ -36,11 +37,13 @@ export class ListUserComponent implements OnInit {
   userStatus: UserStatus = 'active'
   selectedOrg: IOrganization | null = null
   hasSearched = false
+  private statusUpdateUserIds = new Set<string>()
 
   constructor(
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private usersService: UsersService,
+    private homeUsersService: HomeUsersService,
     private configSvc: ConfigurationsService,
   ) { }
 
@@ -176,6 +179,12 @@ export class ListUserComponent implements OnInit {
       case 'reassign':
         this.openReassignDialog(event.user)
         break
+      case 'activate':
+        this.updateUserStatus(event.user, true)
+        break
+      case 'deactivate':
+        this.updateUserStatus(event.user, false)
+        break
     }
   }
 
@@ -254,6 +263,36 @@ export class ListUserComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result?.success) { this.refreshAfterDelay() }
     })
+  }
+
+  private updateUserStatus(user: IUserProfile, activate: boolean): void {
+    if (this.statusUpdateUserIds.has(user.userId)) { return }
+
+    const loggedInUserId = (this.configSvc.userProfile as any)?.userId || ''
+    this.statusUpdateUserIds.add(user.userId)
+
+    const request$ = activate
+      ? this.homeUsersService.newUnBlockUserKong(loggedInUserId, user.userId)
+      : this.homeUsersService.newBlockUserKong(loggedInUserId, user.userId)
+
+    request$.subscribe(
+      () => {
+        this.statusUpdateUserIds.delete(user.userId)
+        this.snackBar.open(`User ${activate ? 'activated' : 'deactivated'} successfully`, 'X', {
+          duration: 5000,
+          panelClass: ['success'],
+        })
+        this.refreshAfterDelay()
+      },
+      (err: any) => {
+        this.statusUpdateUserIds.delete(user.userId)
+        this.snackBar.open(
+          err?.error?.params?.errmsg || `Failed to ${activate ? 'activate' : 'deactivate'} user`,
+          'X',
+          { duration: 5000, panelClass: ['error'] },
+        )
+      },
+    )
   }
 
   /** Show loader immediately, wait 2 s for backend to index, then re-fetch */

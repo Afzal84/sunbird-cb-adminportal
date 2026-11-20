@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { IUserProfile } from '../../models/users.models'
 
-export type UserAction = 'editDetails' | 'manageRoles' | 'resetPassword' | 'migrate' | 'reassign'
+export type UserAction = 'editDetails' | 'manageRoles' | 'resetPassword' | 'migrate' | 'reassign' | 'activate' | 'deactivate'
 
 @Component({
   standalone: false,
@@ -28,6 +28,14 @@ export class UserActionsMenuComponent {
 
   get isNotMyUser(): boolean {
     return this.user.profileDetails?.profileStatus === 'NOT-MY-USER'
+  }
+
+  get isActive(): boolean {
+    return this.user.status === 1
+  }
+
+  get isInactive(): boolean {
+    return this.user.status === 0
   }
 
   onAction(action: UserAction): void {

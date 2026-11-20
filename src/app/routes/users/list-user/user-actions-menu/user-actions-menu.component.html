@@ -2,7 +2,7 @@
   <mat-icon>more_vert</mat-icon>
 </button>
 
-<mat-menu #actionsMenu="matMenu">
+<mat-menu #actionsMenu="matMenu" class="user-actions-menu-panel">
   <button mat-menu-item *ngIf="isNotDeleted && canWrite" (click)="onAction('editDetails')">
     <mat-icon>edit</mat-icon>
     <span>Edit User Details</span>
@@ -26,6 +26,16 @@
   <button mat-menu-item *ngIf="canWrite && isNotMyUser" (click)="onAction('reassign')">
     <mat-icon>person_add</mat-icon>
     <span>Reassign User</span>
+  </button>
+
+  <button mat-menu-item *ngIf="isActive" (click)="onAction('deactivate')">
+    <mat-icon class="material-icons-sharp">toggle_on</mat-icon>
+    <span>Deactivate User</span>
+  </button>
+
+  <button mat-menu-item *ngIf="isInactive" (click)="onAction('activate')">
+    <mat-icon class="material-icons-sharp">toggle_off</mat-icon>
+    <span>Activate User</span>
   </button>
 
 </mat-menu>

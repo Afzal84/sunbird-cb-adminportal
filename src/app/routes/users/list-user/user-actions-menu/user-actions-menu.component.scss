@@ -1,3 +1,32 @@
 :host {
   display: inline-block;
 }
+
+::ng-deep .user-actions-menu-panel {
+  .mat-mdc-menu-content {
+    padding: 4px 0;
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 44px;
+    align-items: center;
+  }
+
+  .mat-mdc-menu-item .mat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 24px;
+    margin-top: 0;
+    margin-bottom: 0;
+    line-height: 24px;
+  }
+
+  .mat-mdc-menu-item .mat-mdc-menu-item-text {
+    display: flex;
+    align-items: center;
+    height: auto;
+    min-height: 24px;
+    line-height: 20px;
+  }
+}
