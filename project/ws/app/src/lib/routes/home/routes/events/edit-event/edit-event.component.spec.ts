@@ -7,7 +7,7 @@ class MockMatSnackBar {
 }
 
 class MockEventsService {
-	getEventDetails = jest.fn().mockReturnValue(of({
+	getEventDetailsInEditMode = jest.fn().mockReturnValue(of({
 		result: {
 			event: {
 				appIcon: 'mock-icon-url',
@@ -16,8 +16,9 @@ class MockEventsService {
 				learningObjective: 'Mock Agenda',
 				registrationLink: 'https://example.com/meeting',
 				resourceType: 'Webinar',
-				endDate: '2025-03-01',
+				endDate: '2026-11-25',
 				startTime: '10:00',
+				endTime: '23:00:00+05:30',
 				duration: 90,
 				creatorDetails: JSON.stringify([{ name: 'John Doe', email: 'john@example.com', mdoName: 'Test Department' }]),
 				versionKey: 'mock-version-key'
@@ -27,6 +28,7 @@ class MockEventsService {
 	crreateAsset = jest.fn().mockReturnValue(of({ result: { identifier: 'mock-content-id' } }));
 	uploadFile = jest.fn().mockReturnValue(of({ result: { artifactUrl: 'mock-artifact-url' } }));
 	updateEvent = jest.fn().mockReturnValue(of({ result: { identifier: 'mock-event-id' } }));
+	publishEvent = jest.fn().mockReturnValue(of({ result: { identifier: 'mock-event-id' } }));
 }
 
 class MockMatDialog {
@@ -54,6 +56,7 @@ class MockChangeDetectorRef {
 
 class MockActivatedRoute {
 	params = of({ id: 'mock-event-id' });
+	queryParams = of({ filter: 'all' });
 	snapshot = {
 		data: {
 			configService: {
@@ -112,6 +115,8 @@ describe('EditEventComponent', () => {
 			mockEvents as any,
 			mockProfileUtilSvc as any
 		)
+		component.createEventForm.get('eventDate')?.setValue(new Date('2026-11-25'))
+		component.createEventForm.get('eventTime')?.setValue('10:00')
 
 		// Set up some spies
 		jest.spyOn(document, 'getElementById').mockReturnValue({
@@ -125,7 +130,7 @@ describe('EditEventComponent', () => {
 	})
 
 	afterEach(() => {
-		jest.clearAllMocks()
+		jest.restoreAllMocks()
 	})
 
 	test('should initialize the component', () => {
@@ -137,12 +142,13 @@ describe('EditEventComponent', () => {
 	})
 
 	test('should load event details on init', () => {
-		expect(mockEventsService.getEventDetails).toHaveBeenCalledWith('mock-event-id')
+		expect(mockEventsService.getEventDetailsInEditMode).toHaveBeenCalledWith('mock-event-id')
 		expect(component.eventObject).toBeDefined()
 		expect(component.createEventForm.get('eventTitle')?.value).toBe('Mock Event')
 		expect(component.createEventForm.get('description')?.value).toBe('Mock Description')
 		expect(component.createEventForm.get('conferenceLink')?.value).toBe('https://example.com/meeting')
 		expect(component.createEventForm.get('eventType')?.value).toBe('Webinar')
+		expect(component.createEventForm.get('certificateRequired')?.value).toBe('no')
 		expect(component.hours).toBe(1)
 		expect(component.minutes).toBe(30)
 	})
@@ -222,6 +228,8 @@ describe('EditEventComponent', () => {
 	})
 
 	test('should add presenters when addPresenters is called', () => {
+		component.presentersArr = []
+		component.participantsArr = []
 		const mockResponseObj = {
 			data: {
 				'0': {
@@ -268,7 +276,7 @@ describe('EditEventComponent', () => {
 
 		component.onSubmit()
 
-		expect(component.disableCreateButton).toBe(true)
+		expect(component.disableCreateButton).toBe(false)
 		expect(component.displayLoader).toBe(true)
 		expect(mockEventsService.updateEvent).toHaveBeenCalled()
 
@@ -280,6 +288,56 @@ describe('EditEventComponent', () => {
 		expect(payload.request.event.registrationLink).toBe('https://example.com/updated')
 		expect(payload.request.event.identifier).toBe('mock-event-id')
 		expect(payload.request.event.versionKey).toBe('mock-version-key')
+		expect(payload.request.event.certificateRequired).toBe('No')
+	})
+
+	test('should send certificateRequired when updating a non-webinar event', () => {
+		component.createEventForm.get('eventType')?.setValue('Karmayogi Talks')
+		component.createEventForm.get('certificateRequired')?.setValue('yes')
+
+		component.onSubmit()
+
+		const payload = mockEventsService.updateEvent.mock.calls[0][1]
+		expect(payload.request.event.certificateRequired).toBe('Yes')
+	})
+
+	test('should submit after confirmation when certificate is enabled', () => {
+		const submitSpy = jest.spyOn(component, 'onSubmit').mockImplementation()
+		component.createEventForm.get('certificateRequired')?.enable()
+		component.createEventForm.get('certificateRequired')?.setValue('yes')
+		mockMatDialog.open.mockReturnValue({ afterClosed: () => of('confirmed') })
+
+		component.onSubmitClick()
+
+		expect(mockMatDialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+			disableClose: true,
+			data: expect.objectContaining({
+				primaryAction: 'Proceed',
+				secondaryAction: 'Cancel',
+			}),
+		}))
+		expect(submitSpy).toHaveBeenCalledTimes(1)
+	})
+
+	test('should submit directly without a dialog when certificate is disabled', () => {
+		const submitSpy = jest.spyOn(component, 'onSubmit').mockImplementation()
+		component.onCertificateRequiredChange(false)
+
+		component.onSubmitClick()
+
+		expect(mockMatDialog.open).not.toHaveBeenCalled()
+		expect(submitSpy).toHaveBeenCalledTimes(1)
+	})
+
+	test('should submit directly without a dialog when certificate control is disabled for an expired event', () => {
+		const submitSpy = jest.spyOn(component, 'onSubmit').mockImplementation()
+		component.createEventForm.get('certificateRequired')?.setValue('yes')
+		component.createEventForm.get('certificateRequired')?.disable()
+
+		component.onSubmitClick()
+
+		expect(mockMatDialog.open).not.toHaveBeenCalled()
+		expect(submitSpy).toHaveBeenCalledTimes(1)
 	})
 
 	test('should handle form submission with zero duration', () => {
@@ -302,12 +360,15 @@ describe('EditEventComponent', () => {
 		component.createEventForm.get('eventDurationHours')?.setValue(1)
 		component.createEventForm.get('eventDurationMinutes')?.setValue(30)
 		component.createEventForm.get('conferenceLink')?.setValue('https://example.com/updated')
+		component.onCertificateRequiredChange(false)
 
 		// Mock error response
 		mockEventsService.updateEvent.mockReturnValue(throwError({ error: 'Error:Update failed' }))
 
 		component.onSubmit()
 
+		const payload = mockEventsService.updateEvent.mock.calls[0][1]
+		expect(payload.request.event.certificateRequired).toBe('No')
 		expect(mockSnackBar.open).toHaveBeenCalledWith('Update failed', 'X', { duration: 5000 })
 		expect(component.displayLoader).toBe(false)
 		expect(component.disableCreateButton).toBe(false)

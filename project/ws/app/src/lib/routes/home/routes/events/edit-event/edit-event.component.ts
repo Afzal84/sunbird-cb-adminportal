@@ -18,6 +18,7 @@ import { TelemetryEvents } from '../model/telemetry.event.model'
 import { ProfileV2UtillService } from '../services/home-utill.service'
 import { MomentDateAdapter } from '@angular/material-moment-adapter'
 import { preventHtmlAndJs } from '../../../validators/prevent-html-and-js.validator'
+import { ConfirmationPopupComponent } from '../../request/confirmation-popup/confirmation-popup.component'
 /* tslint:enable */
 
 export const MY_FORMATS = {
@@ -180,6 +181,7 @@ export class EditEventComponent implements OnInit, OnDestroy {
       agenda: new UntypedFormControl('', [preventHtmlAndJs()]),
       // isItKarmayogiTalk: new FormControl('', []),
       eventType: new UntypedFormControl('', [Validators.required]),
+      certificateRequired: new UntypedFormControl('no'),
       eventDate: new UntypedFormControl('', [Validators.required]),
       eventTime: new UntypedFormControl('', [Validators.required]),
       eventDurationHours: new UntypedFormControl('', [Validators.required]),
@@ -216,6 +218,9 @@ export class EditEventComponent implements OnInit, OnDestroy {
         }
         this.createEventForm.controls['eventTime'].setValue(eventObj.endDate)
         this.createEventForm.controls['eventType'].setValue(eventObj.resourceType)
+        this.createEventForm.controls['certificateRequired'].setValue(
+          String(eventObj.certificateRequired || '').toLowerCase() === 'yes' ? 'yes' : 'no'
+        )
         this.todayDate = new Date((new Date(eventObj.endDate).getTime()))
         const dateStr = eventObj.startTime.split(':')
         this.todayTime = `${dateStr[0]}:${dateStr[1]}`
@@ -261,6 +266,7 @@ export class EditEventComponent implements OnInit, OnDestroy {
           this.createEventForm.get('eventTime')?.disable()
           this.createEventForm.get('eventDurationHours')?.disable()
           this.createEventForm.get('eventDurationMinutes')?.disable()
+          this.createEventForm.get('certificateRequired')?.disable()
         } else {
           this.fullEdit = true
         }
@@ -669,6 +675,9 @@ export class EditEventComponent implements OnInit, OnDestroy {
       this.reqPayload.request.event.registrationLink = this.youTubeUrlChange(this.createEventForm.controls['conferenceLink'].value)
     }
 
+    this.reqPayload.request.event.certificateRequired =
+      this.createEventForm.controls['certificateRequired'].value === 'yes' ? 'Yes' : 'No'
+
     if (this.createEventForm.controls['state'] && this.createEventForm.controls['state'].value && this.showRajyaField) {
       this.reqPayload['request']['event']['resourceTypeDetails'] = this.getStateDetail()
     }
@@ -702,6 +711,37 @@ export class EditEventComponent implements OnInit, OnDestroy {
     }
   }
 
+  onSubmitClick() {
+    const certificateRequiredControl = this.createEventForm.controls['certificateRequired']
+    if (certificateRequiredControl.disabled || certificateRequiredControl.value !== 'yes') {
+      this.onSubmit()
+      return
+    }
+
+    const confirmationDialog = this.matDialog.open(ConfirmationPopupComponent, {
+      disableClose: true,
+      panelClass: 'certificate-confirmation-dialog',
+      data: {
+        type: 'conformation',
+        title: [
+          'Are you sure you want to award certificates to attendees of this event?',
+          'If not, please cancel and disable the "Event with Certificate" option.',
+        ].join(' '),
+        subTitle: 'Please confirm to proceeed.',
+        primaryAction: 'Proceed',
+        secondaryAction: 'Cancel',
+        isCertificateConfirmation: true,
+      },
+      autoFocus: false,
+    })
+
+    confirmationDialog.afterClosed().subscribe((response: any) => {
+      if (response === 'confirmed') {
+        this.onSubmit()
+      }
+    })
+  }
+
   publishEvent(identifierkey: any, versionKey: any) {
     const reqestBody = {
       request: {
@@ -726,6 +766,10 @@ export class EditEventComponent implements OnInit, OnDestroy {
         this.openSnackbar(err.error.split(':')[1])
       }
     )
+  }
+
+  onCertificateRequiredChange(checked: boolean) {
+    this.createEventForm.controls['certificateRequired'].setValue(checked ? 'yes' : 'no')
   }
 
   combineDateAndTime(date: any, time: any) {

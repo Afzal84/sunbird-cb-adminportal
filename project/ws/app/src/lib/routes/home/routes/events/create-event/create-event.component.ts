@@ -20,6 +20,7 @@ import { ProfileV2UtillService } from '../services/home-utill.service'
 import { preventHtmlAndJs } from '../../../validators/prevent-html-and-js.validator'
 import { PipePublicURL } from '../../../pipes/pipe-public-URL/pipe-public-URL.pipe'
 import { GlobalEventsService } from '../../../../../../../../../../src/app/services/global-events.service'
+import { ConfirmationPopupComponent } from '../../request/confirmation-popup/confirmation-popup.component'
 /* tslint:enable */
 
 export const MY_FORMATS = {
@@ -180,6 +181,7 @@ export class CreateEventComponent implements OnInit, OnDestroy {
       agenda: new UntypedFormControl('', [preventHtmlAndJs()]),
       // isItKarmayogiTalk: new FormControl('', []),
       eventType: new UntypedFormControl('', [Validators.required]),
+      certificateRequired: new UntypedFormControl('yes'),
       eventDate: new UntypedFormControl('', [Validators.required]),
       eventTime: new UntypedFormControl('', [Validators.required]),
       eventDurationHours: new UntypedFormControl(0, [Validators.required]),
@@ -584,6 +586,9 @@ export class CreateEventComponent implements OnInit, OnDestroy {
       this.reqPayload.request.event.registrationLink = this.youTubeUrlChange(this.createEventForm.controls['conferenceLink'].value)
     }
 
+    this.reqPayload.request.event.certificateRequired =
+      this.createEventForm.controls['certificateRequired'].value === 'yes' ? 'Yes' : 'No'
+
     if (this.createEventForm.controls['state'] && this.createEventForm.controls['state'].value && this.showRajyaField) {
       this.reqPayload['request']['event']['resourceTypeDetails'] = this.getStateDetail()
     } else {
@@ -616,6 +621,40 @@ export class CreateEventComponent implements OnInit, OnDestroy {
         }
       )
     }
+  }
+
+  onSubmitClick() {
+    if (this.createEventForm.controls['certificateRequired'].value !== 'yes') {
+      this.onSubmit()
+      return
+    }
+
+    const confirmationDialog = this.matDialog.open(ConfirmationPopupComponent, {
+      disableClose: true,
+      panelClass: 'certificate-confirmation-dialog',
+      data: {
+        type: 'conformation',
+        title: [
+          'Are you sure you want to award certificates to attendees of this event?',
+          'If not, please cancel and disable the "Event with Certificate" option.',
+        ].join(' '),
+        subTitle: 'Please confirm to proceeed.',
+        primaryAction: 'Proceed',
+        secondaryAction: 'Cancel',
+        isCertificateConfirmation: true,
+      },
+      autoFocus: false,
+    })
+
+    confirmationDialog.afterClosed().subscribe((response: any) => {
+      if (response === 'confirmed') {
+        this.onSubmit()
+      }
+    })
+  }
+
+  onCertificateRequiredChange(checked: boolean) {
+    this.createEventForm.controls['certificateRequired'].setValue(checked ? 'yes' : 'no')
   }
 
   combineDateAndTime(date: any, time: any) {

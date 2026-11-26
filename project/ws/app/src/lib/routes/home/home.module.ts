@@ -26,6 +26,7 @@ import { MatRadioModule } from '@angular/material/radio'
 import { MatSelectModule } from '@angular/material/select'
 import { MatSidenavModule } from '@angular/material/sidenav'
 import { MatSortModule } from '@angular/material/sort'
+import { MatSlideToggleModule } from '@angular/material/slide-toggle'
 import { MatTableModule } from '@angular/material/table'
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { MatCardModule } from '@angular/material/card'
@@ -212,6 +213,7 @@ import { RejectRequestFormComponent } from './routes/reject-request-form/reject-
         UIORGTableModule,
         MatTableModule,
         MatSortModule,
+        MatSlideToggleModule,
         MatMenuModule,
         MatPaginatorModule,
         PipePublicURLModule,

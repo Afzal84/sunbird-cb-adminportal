@@ -118,6 +118,41 @@ textarea.mat-input-element {
   margin-right: 20px;
 }
 
+.event-type-certificate-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.event-type-field {
+  width: 100%;
+  max-width: 395px;
+
+  .custom-width {
+    width: 100% !important;
+  }
+}
+
+.certificate-toggle-field {
+  display: flex;
+  align-items: center;
+  min-height: 51px;
+  margin-top: 24px;
+}
+
+@media (max-width: 640px) {
+  .event-type-certificate-row {
+    gap: 12px;
+  }
+
+  .certificate-toggle-field {
+    width: 100%;
+    min-height: auto;
+    margin-top: 0;
+  }
+}
+
 
 .browse-link {
   color: #0075B7 !important;

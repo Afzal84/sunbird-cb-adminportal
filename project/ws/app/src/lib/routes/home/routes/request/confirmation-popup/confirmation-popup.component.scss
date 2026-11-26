@@ -47,6 +47,45 @@
     background-color: rgb(27, 76, 161) !important;
 }
 
+::ng-deep .certificate-confirmation-dialog {
+    .cancel,
+    .primary {
+        min-width: 76px;
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .cancel {
+        color: #1B4CA1 !important;
+        background-color: #FFFFFF !important;
+        border: none !important;
+        box-shadow: 0 2px 7px rgba(0, 0, 0, 0.22);
+    }
+
+}
+
+.certificate-proceed-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    min-width: 120px;
+    margin-left: 16px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 6px;
+    color: #FFFFFF !important;
+    background-color: #1B4CA1 !important;
+    font-family: Lato, sans-serif;
+    font-size: 14px;
+    font-weight: 600 !important;
+    line-height: 36px;
+    cursor: pointer;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
 .progress-title {
     justify-content: center;
     color: rgba(0,0,0,0.87);

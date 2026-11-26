@@ -22,7 +22,7 @@ describe('CreateEventComponent', () => {
 
 	beforeEach(() => {
 		mockMatDialog = {
-			open: jest.fn(),
+			open: jest.fn().mockReturnValue({ afterClosed: () => of({}) }),
 		} as any
 
 		mockSnackBar = {
@@ -34,6 +34,7 @@ describe('CreateEventComponent', () => {
 			uploadFile: jest.fn(),
 			createEvent: jest.fn(),
 			publishEvent: jest.fn(),
+			getSlwResourceTypeDetail: jest.fn().mockReturnValue(of({})),
 		} as any
 
 		mockRouter = {
@@ -103,6 +104,7 @@ describe('CreateEventComponent', () => {
 			mockEventService as any,
 			mockProfileUtilService as any,
 			mockPipePublicURL as any,
+			{ setLoaderState: jest.fn() } as any,
 		)
 
 		component.ngOnInit()
@@ -128,11 +130,21 @@ describe('CreateEventComponent', () => {
 
 		it('should validate conference link with URL pattern', () => {
 			const control = component.createEventForm.controls['conferenceLink']
-			control.setValue('https://valid-url.com/meeting')
+			control.setValue('https://www.youtube.com/watch?v=validVideoId')
 			expect(control.valid).toBeTruthy()
 
 			control.setValue('invalid-url')
 			expect(control.valid).toBeFalsy()
+		})
+
+		it('should keep certificate attachment on by default and store string values', () => {
+			expect(component.createEventForm.controls['certificateRequired'].value).toBe('yes')
+
+			component.onCertificateRequiredChange(true)
+			expect(component.createEventForm.controls['certificateRequired'].value).toBe('yes')
+
+			component.onCertificateRequiredChange(false)
+			expect(component.createEventForm.controls['certificateRequired'].value).toBe('no')
 		})
 	})
 
@@ -222,7 +234,56 @@ describe('CreateEventComponent', () => {
 			component.onSubmit()
 
 			expect(mockEventsService.createEvent).toHaveBeenCalled()
+			expect(mockEventsService.createEvent.mock.calls[0][0].request.event.certificateRequired).toBe('Yes')
 			expect(mockEventsService.publishEvent).toHaveBeenCalled()
+		})
+
+		it('should send certificateRequired as yes when the toggle is on', () => {
+			mockEventsService.createEvent.mockReturnValue(of({
+				result: { identifier: 'test-event-id', versionKey: 'test-version' },
+			}))
+			mockEventsService.publishEvent.mockReturnValue(of({ result: 'success' }))
+
+			component.createEventForm.patchValue({
+				eventTitle: 'Test Event',
+				eventType: 'Webinar',
+				description: 'Test Description',
+				eventDate: new Date(),
+				eventTime: '10:00',
+				eventDurationHours: 1,
+				eventDurationMinutes: 30,
+				conferenceLink: 'https://test.com',
+				eventPicture: 'test.jpg',
+				certificateRequired: 'yes',
+			})
+
+			component.onSubmit()
+
+			expect(mockEventsService.createEvent.mock.calls[0][0].request.event.certificateRequired).toBe('Yes')
+		})
+
+		it('should send certificateRequired for non-webinar events', () => {
+			mockEventsService.createEvent.mockReturnValue(of({
+				result: { identifier: 'test-event-id', versionKey: 'test-version' },
+			}))
+			mockEventsService.publishEvent.mockReturnValue(of({ result: 'success' }))
+
+			component.createEventForm.patchValue({
+				eventTitle: 'Test Event',
+				eventType: 'Karmayogi Talks',
+				description: 'Test Description',
+				eventDate: new Date(),
+				eventTime: '10:00',
+				eventDurationHours: 1,
+				eventDurationMinutes: 30,
+				conferenceLink: 'https://test.com',
+				eventPicture: 'test.jpg',
+				certificateRequired: 'yes',
+			})
+
+			component.onSubmit()
+
+			expect(mockEventsService.createEvent.mock.calls[0][0].request.event.certificateRequired).toBe('Yes')
 		})
 
 		it('should handle event creation error', () => {
@@ -249,6 +310,43 @@ describe('CreateEventComponent', () => {
 				'X',
 				expect.any(Object)
 			)
+		})
+	})
+
+	describe('Certificate confirmation', () => {
+		it('should submit after confirmation when certificate is enabled', () => {
+			const submitSpy = jest.spyOn(component, 'onSubmit').mockImplementation()
+			mockMatDialog.open.mockReturnValue({ afterClosed: () => of('confirmed') } as any)
+
+			component.onSubmitClick()
+
+			expect(mockMatDialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+				disableClose: true,
+				data: expect.objectContaining({
+					primaryAction: 'Proceed',
+					secondaryAction: 'Cancel',
+				}),
+			}))
+			expect(submitSpy).toHaveBeenCalledTimes(1)
+		})
+
+		it('should not submit when certificate confirmation is cancelled', () => {
+			const submitSpy = jest.spyOn(component, 'onSubmit').mockImplementation()
+			mockMatDialog.open.mockReturnValue({ afterClosed: () => of('Cancel') } as any)
+
+			component.onSubmitClick()
+
+			expect(submitSpy).not.toHaveBeenCalled()
+		})
+
+		it('should submit directly when certificate is disabled', () => {
+			const submitSpy = jest.spyOn(component, 'onSubmit').mockImplementation()
+			component.onCertificateRequiredChange(false)
+
+			component.onSubmitClick()
+
+			expect(mockMatDialog.open).not.toHaveBeenCalled()
+			expect(submitSpy).toHaveBeenCalledTimes(1)
 		})
 	})
 

@@ -18,8 +18,14 @@
     <div mat-dialog-actions class="flex flex-1 flex-row action">
         <button mat-button class="cancel" type="button"
             [mat-dialog-close]="data?.secondaryAction">{{data?.secondaryAction}}</button>
-        <button mat-button class="primary margin-left-m" type="button"
-            (click)="performAction(data)">{{data?.primaryAction}}</button>
+        <button *ngIf="data?.isCertificateConfirmation; else defaultPrimaryAction" class="certificate-proceed-button"
+            type="button" (click)="performAction(data)">
+            {{data?.primaryAction}}
+        </button>
+        <ng-template #defaultPrimaryAction>
+            <button mat-button class="primary margin-left-m" type="button"
+                (click)="performAction(data)">{{data?.primaryAction}}</button>
+        </ng-template>
     </div>
 </div>
 

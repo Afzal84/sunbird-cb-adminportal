@@ -15,7 +15,7 @@
                     (click)="goToList()">
                     <span>Cancel</span>
                 </button>
-                <button mat-button class="create-btn btn-success" type="button" (click)="onSubmit()"
+                <button mat-button class="create-btn btn-success" type="button" (click)="onSubmitClick()"
                     [disabled]="!createEventForm.valid || disableCreateButton">
                     <span>Update</span>
                 </button>
@@ -168,14 +168,24 @@
                                 <mat-hint>{{agenda.value.length}}/500 characters</mat-hint>
                             </mat-form-field>
                         </div>
-                        <div class="margin-bottom-s">
-                            <label>Event type</label>
-                            <mat-form-field appearance="outline" class="custom-width margin-top-xs">
-                                <mat-select formControlName="eventType" (selectionChange)="resetDateField()">
-                                    <mat-option [value]="type" *ngFor="let type of evntTypesList">{{type}}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
+                        <div class="margin-bottom-s event-type-certificate-row">
+                            <div class="event-type-field">
+                                <label>Event type</label>
+                                <mat-form-field appearance="outline" class="custom-width margin-top-xs">
+                                    <mat-select formControlName="eventType" (selectionChange)="resetDateField()">
+                                        <mat-option [value]="type" *ngFor="let type of evntTypesList">{{type}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div class="certificate-toggle-field">
+                                <mat-slide-toggle id="certificateRequired" aria-label="Event with Certificate"
+                                    [disabled]="createEventForm.controls['certificateRequired'].disabled"
+                                    [checked]="createEventForm.controls['certificateRequired'].value === 'yes'"
+                                    (change)="onCertificateRequiredChange($event.checked)">
+                                    Event with Certificate
+                                </mat-slide-toggle>
+                            </div>
                             <!-- <div class="flex custom mt-5" fxLayout="row wrap">
                                 <mat-card class="event_container padding-remove" fxLayout="row"
                                     fxLayoutWrap>
@@ -443,7 +453,7 @@
                     (click)="goToList()">
                     <span>Cancel</span>
                 </button>
-                <button mat-button class="create-btn btn-success" type="button" (click)="onSubmit()"
+                <button mat-button class="create-btn btn-success" type="button" (click)="onSubmitClick()"
                     [disabled]="!createEventForm.valid || disableCreateButton">
                     <span>Update</span>
                 </button>
